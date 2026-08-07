@@ -2,7 +2,7 @@
 
 Real-world seasons for SPT, for either the Northern or Southern Hemisphere.
 
-Version: 3.0.0
+Version: 3.1.0
 
 Author: Dildz
 

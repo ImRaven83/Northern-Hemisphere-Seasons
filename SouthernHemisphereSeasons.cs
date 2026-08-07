@@ -17,7 +17,7 @@ public record ModMetadata : IModMetadata
     public string Name { get; init; } = "Southern-Hemisphere-Seasons";
     public string Author { get; init; } = "Dildz";
     public List<string>? Contributors { get; init; } = ["bushtail"];
-    public SemanticVersioning.Version Version { get; init; } = new("3.0.0");
+    public SemanticVersioning.Version Version { get; init; } = new("3.1.0");
     public SemanticVersioning.Range SptVersion { get; init; } = new("~4.1.0");
     public bool HasPrepatcher { get; init; } = false;
     public List<string>? Incompatibilities { get; init; }
