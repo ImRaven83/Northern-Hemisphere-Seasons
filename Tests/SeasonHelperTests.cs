@@ -14,7 +14,41 @@ public class SeasonHelperTests
 {
     private static DateTime InMonth(int month) => new(2026, month, 15);
 
-    // --- The Southern Hemisphere calendar, one case per month ---------------------------------
+    // --- The Northern Hemisphere calendar (default), one case per month -----------------------
+
+    [TestCase(6, Season.SUMMER)]
+    [TestCase(7, Season.SUMMER)]
+    [TestCase(8, Season.SUMMER)]
+    [TestCase(9, Season.AUTUMN)]
+    [TestCase(10, Season.AUTUMN)]
+    [TestCase(11, Season.AUTUMN_LATE)]
+    [TestCase(12, Season.WINTER)]
+    [TestCase(1, Season.WINTER)]
+    [TestCase(2, Season.WINTER)]
+    [TestCase(3, Season.SPRING_EARLY)]
+    [TestCase(4, Season.SPRING)]
+    [TestCase(5, Season.SPRING)]
+    public void GetSeasonFromDate_North_MapsEachMonthToDocumentedSeason(int month, Season expected)
+    {
+        Assert.That(SeasonHelper.GetSeasonFromDate(InMonth(month), Hemisphere.North), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void GetSeasonFromDate_North_CoversEveryMonth()
+    {
+        // Guards the switch's default arm: if a month ever stopped being handled it would silently
+        // fall through to SUMMER. Every month must map to the season the README documents.
+        var seasons = Enumerable.Range(1, 12).Select(m => SeasonHelper.GetSeasonFromDate(InMonth(m), Hemisphere.North)).ToList();
+
+        Assert.That(seasons, Has.Exactly(3).EqualTo(Season.SUMMER), "Jun, Jul, Aug");
+        Assert.That(seasons, Has.Exactly(2).EqualTo(Season.AUTUMN), "Sep, Oct");
+        Assert.That(seasons, Has.Exactly(1).EqualTo(Season.AUTUMN_LATE), "Nov");
+        Assert.That(seasons, Has.Exactly(3).EqualTo(Season.WINTER), "Dec, Jan, Feb");
+        Assert.That(seasons, Has.Exactly(1).EqualTo(Season.SPRING_EARLY), "Mar");
+        Assert.That(seasons, Has.Exactly(2).EqualTo(Season.SPRING), "Apr, May");
+    }
+
+    // --- The Southern Hemisphere calendar, one case per month (6 months out of phase) ---------
 
     [TestCase(12, Season.SUMMER)]
     [TestCase(1, Season.SUMMER)]
@@ -28,17 +62,15 @@ public class SeasonHelperTests
     [TestCase(9, Season.SPRING_EARLY)]
     [TestCase(10, Season.SPRING)]
     [TestCase(11, Season.SPRING)]
-    public void GetSeasonFromDate_MapsEachMonthToDocumentedSeason(int month, Season expected)
+    public void GetSeasonFromDate_South_MapsEachMonthToDocumentedSeason(int month, Season expected)
     {
-        Assert.That(SeasonHelper.GetSeasonFromDate(InMonth(month)), Is.EqualTo(expected));
+        Assert.That(SeasonHelper.GetSeasonFromDate(InMonth(month), Hemisphere.South), Is.EqualTo(expected));
     }
 
     [Test]
-    public void GetSeasonFromDate_CoversEveryMonth()
+    public void GetSeasonFromDate_South_CoversEveryMonth()
     {
-        // Guards the switch's default arm: if a month ever stopped being handled it would silently
-        // fall through to SUMMER. Every month must map to the season the README documents.
-        var seasons = Enumerable.Range(1, 12).Select(m => SeasonHelper.GetSeasonFromDate(InMonth(m))).ToList();
+        var seasons = Enumerable.Range(1, 12).Select(m => SeasonHelper.GetSeasonFromDate(InMonth(m), Hemisphere.South)).ToList();
 
         Assert.That(seasons, Has.Exactly(3).EqualTo(Season.SUMMER), "Dec, Jan, Feb");
         Assert.That(seasons, Has.Exactly(2).EqualTo(Season.AUTUMN), "Mar, Apr");
@@ -46,6 +78,33 @@ public class SeasonHelperTests
         Assert.That(seasons, Has.Exactly(3).EqualTo(Season.WINTER), "Jun, Jul, Aug");
         Assert.That(seasons, Has.Exactly(1).EqualTo(Season.SPRING_EARLY), "Sep");
         Assert.That(seasons, Has.Exactly(2).EqualTo(Season.SPRING), "Oct, Nov");
+    }
+
+    // --- Hemisphere parsing ----------------------------------------------------------------------
+
+    [TestCase("North", Hemisphere.North)]
+    [TestCase("north", Hemisphere.North)]
+    [TestCase("SOUTH", Hemisphere.South)]
+    [TestCase("South", Hemisphere.South)]
+    public void ParseHemisphere_RecognisedValues_AreCaseInsensitive(string value, Hemisphere expected)
+    {
+        Assert.That(SeasonHelper.ParseHemisphere(value), Is.EqualTo(expected));
+    }
+
+    [TestCase(null)]
+    [TestCase("")]
+    [TestCase("Eastern")]
+    public void ParseHemisphere_UnrecognisedOrMissingValue_FallsBackToNorth(string? value)
+    {
+        Assert.That(SeasonHelper.ParseHemisphere(value), Is.EqualTo(Hemisphere.North));
+    }
+
+    [Test]
+    public void GetSeason_UsesConfiguredHemisphere()
+    {
+        // June is Summer in the North and Winter in the South - a clear signal the config value was honoured.
+        Assert.That(SeasonHelper.GetSeason(new ModConfig { Hemisphere = "North" }, InMonth(6)), Is.EqualTo(Season.SUMMER));
+        Assert.That(SeasonHelper.GetSeason(new ModConfig { Hemisphere = "South" }, InMonth(6)), Is.EqualTo(Season.WINTER));
     }
 
     // --- forceSeason ---------------------------------------------------------------------------
@@ -60,7 +119,8 @@ public class SeasonHelperTests
     {
         var config = new ModConfig { ForceSeason = forced };
 
-        // June would otherwise be WINTER, so anything but `expected` means the override was ignored.
+        // June would otherwise be SUMMER (default Northern calendar), so anything but `expected`
+        // means the override was ignored.
         Assert.That(SeasonHelper.GetSeason(config, InMonth(6)), Is.EqualTo(expected));
     }
 
@@ -72,7 +132,7 @@ public class SeasonHelperTests
     {
         var config = new ModConfig { ForceSeason = forced };
 
-        Assert.That(SeasonHelper.GetSeason(config, InMonth(6)), Is.EqualTo(Season.WINTER));
+        Assert.That(SeasonHelper.GetSeason(config, InMonth(6)), Is.EqualTo(Season.SUMMER));
     }
 
     // --- Display names -------------------------------------------------------------------------

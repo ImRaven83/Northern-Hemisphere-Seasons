@@ -31,6 +31,13 @@ public record ModConfig
     public bool Enabled { get; set; } = true;
     public int? ForceSeason { get; set; }
     public bool AllowEventSeason { get; set; } = false;
+    public string Hemisphere { get; set; } = "North";
+}
+
+public enum Hemisphere
+{
+    North,
+    South
 }
 
 // Shared state between the OnLoad and OnUpdate classes (SPT may create separate instances for each).
@@ -78,7 +85,8 @@ public class SeasonLoader(
         // Regenerate the weather forecast with our season (SPT already generated one, we need to replace it)
         raidWeatherService.GenerateFutureWeatherAndCache(season);
 
-        logger.Success($"{ModName} Loaded - Season set to: {SeasonHelper.GetSeasonName(season)}");
+        var hemisphere = SeasonHelper.ParseHemisphere(SeasonState.Config.Hemisphere);
+        logger.Success($"{ModName} Loaded - Season set to: {SeasonHelper.GetSeasonName(season)} ({hemisphere} Hemisphere)");
     }
 
     private async Task LoadConfigAsync(CancellationToken cancellationToken)
@@ -167,30 +175,40 @@ public static class SeasonHelper
         if (config.ForceSeason is { } forced && forced >= 0 && forced <= 5)
             return (Season)forced;
 
-        return GetSeasonFromDate(now);
+        return GetSeasonFromDate(now, ParseHemisphere(config.Hemisphere));
     }
 
     /// <summary>
-    /// Determines the current season based on the Southern Hemisphere calendar:
-    /// - Summer:       December 1 - February 28/29
-    /// - Autumn:       March 1 - April 30
-    /// - Late Autumn:  May 1 - May 31
-    /// - Winter:       June 1 - August 31
-    /// - Early Spring: September 1 - September 30
-    /// - Spring:       October 1 - November 30
+    /// Parses the config's Hemisphere string ("North"/"South", case-insensitive). Anything unset,
+    /// unrecognised, or otherwise invalid falls back to North rather than throwing.
     /// </summary>
-    public static Season GetSeasonFromDate(DateTime date)
+    public static Hemisphere ParseHemisphere(string? value) =>
+        Enum.TryParse<Hemisphere>(value, ignoreCase: true, out var hemisphere) ? hemisphere : Hemisphere.North;
+
+    /// <summary>
+    /// Determines the current season from the requested hemisphere's calendar.
+    /// Northern Hemisphere:
+    /// - Summer:       June 1 - August 31
+    /// - Autumn:       September 1 - October 31
+    /// - Late Autumn:  November 1 - November 30
+    /// - Winter:       December 1 - February 28/29
+    /// - Early Spring: March 1 - March 31
+    /// - Spring:       April 1 - May 31
+    /// Southern Hemisphere uses the same table 6 months out of phase (e.g. Southern Summer = Dec-Feb).
+    /// </summary>
+    public static Season GetSeasonFromDate(DateTime date, Hemisphere hemisphere = Hemisphere.North)
     {
-        var month = date.Month;
+        // Southern dates are shifted 6 months forward so they land on the equivalent Northern month.
+        var month = hemisphere == Hemisphere.South ? ((date.Month + 5) % 12) + 1 : date.Month;
 
         return month switch
         {
-            12 or 1 or 2 => Season.SUMMER,
-            3 or 4       => Season.AUTUMN,
-            5            => Season.AUTUMN_LATE,
-            6 or 7 or 8  => Season.WINTER,
-            9            => Season.SPRING_EARLY,
-            10 or 11     => Season.SPRING,
+            6 or 7 or 8  => Season.SUMMER,
+            9 or 10      => Season.AUTUMN,
+            11           => Season.AUTUMN_LATE,
+            12 or 1 or 2 => Season.WINTER,
+            3            => Season.SPRING_EARLY,
+            4 or 5       => Season.SPRING,
             _            => Season.SUMMER
         };
     }
