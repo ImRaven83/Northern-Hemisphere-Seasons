@@ -1,5 +1,6 @@
 {
   "enabled": true,                // enable or disable the mod
+  "hemisphere": "North",          // which real-world hemisphere's seasonal calendar to use: "North" or "South" (default: "North")
   "forceSeason": null,            // force a specific season (null = auto, 0 = Summer, 1 = Autumn, 2 = Winter, 3 = Spring, 4 = Late Autumn, 5 = Early Spring)
   "allowEventSeason": false       // if true, let SPT seasonal events (e.g. Christmas) override this mod's season (default: false)
 }
