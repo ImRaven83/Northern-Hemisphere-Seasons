@@ -1,35 +1,28 @@
 # Southern-Hemisphere-Seasons
 
-Real-world seasons for SPT, for either the Northern or Southern Hemisphere.
-
-Version: 3.1.0
+Version: 2.0.0
 
 Author: Dildz
 
-SPT Version: 4.1.x
+SPT Version: 4.0.x
 
 
 ## Overview:
 
-- This mod aligns the in-game seasons with real-world seasons, for either the Northern or Southern Hemisphere.
-- The mod automatically adjusts the in-game season based on the current date, ensuring that the season reflects the real-world time of year for the hemisphere you select.
+- The Southern-Hemisphere-Seasons mod aligns the in-game seasons with the real-world seasons for players in the Southern Hemisphere.
+- The mod automatically adjusts the in-game season based on the current date, ensuring that the season reflects the real-world time of year.
 
 
 ### Key Features:
 
-- Automatically sets the in-game season based on the real-world date, using either the Northern or Southern Hemisphere's seasonal calendar (configurable, default: Northern).
+- Automatically sets the in-game season based on the real-world date, corresponding to the Southern Hemisphere's seasonal calendar.
 - Rechecks the season every hour for long-running servers, so the season updates without needing a restart.
 - Optional support for SPT seasonal events (e.g. Christmas) - can be configured to let events override the mod's season.
 
 
 ## Installation:
 
-1. Download and Extract: Download the mod package zip from releases and extract it into your game root
-   (the folder containing `SPT_Runtime/`). The zip already contains the `SPT_Runtime\user\mods\` path,
-   so the mod lands in `SPT_Runtime\user\mods\SouthernHemisphereSeasons`.
-
-   > Note for 4.0 users: SPT 4.1 renamed the server folder from `SPT/` to `SPT_Runtime/`. Use the 4.0.x
-   > release of this mod on SPT 4.0 — a 4.1 build will not load on a 4.0 server.
+1. Download and Extract: Download the mod package zip from releases and extract it into your SPT directory.
 
 2. Configuration:
    - The mod comes with a `config/config.jsonc` file where you can enable or disable the mod, force a season, or allow SPT seasonal events to override.
@@ -37,18 +30,8 @@ SPT Version: 4.1.x
 
 ## How It Works:
 
-Season Determination: The mod calculates the current season based on the server's system date and time,
-using whichever hemisphere's calendar you've configured.
-
-Northern Hemisphere calendar (default):
-   - Summer:       June 1 - August 31
-   - Autumn:       September 1 - October 31
-   - Late Autumn:  November 1 - November 30
-   - Winter:       December 1 - February 28/29
-   - Early Spring: March 1 - March 31
-   - Spring:       April 1 - May 31
-
-Southern Hemisphere calendar (the same table, 6 months out of phase):
+Season Determination: The mod calculates the current season based on the server's system date and time.
+It follows the following seasonal calendar:
    - Summer:       December 1 - February 28/29
    - Autumn:       March 1 - April 30
    - Late Autumn:  May 1 - May 31
@@ -61,7 +44,6 @@ Southern Hemisphere calendar (the same table, 6 months out of phase):
 The `config/config.jsonc` file supports the following options:
 
 - `enabled`          - Enable or disable the mod (default: `true`)
-- `hemisphere`       - Which hemisphere's seasonal calendar to use: `"North"` or `"South"` (default: `"North"`)
 - `forceSeason`      - Force a specific season, or `null` for auto-detect (default: `null`)
 - `allowEventSeason` - If `true`, let SPT seasonal events (e.g. Christmas) override this mod's season (default: `false`)
 
