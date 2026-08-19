@@ -12,7 +12,7 @@
 *.env
 .idea
 /bin
-southern_hemisphere_seasons.sln
+northern_hemisphere_seasons.sln
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -422,4 +422,4 @@ FodyWeavers.xsd
 
 # Other
 CLAUDE.md
-SouthernHemisphereSeasons-2.0.0.zip
+NorthernHemisphereSeasons-*.zip

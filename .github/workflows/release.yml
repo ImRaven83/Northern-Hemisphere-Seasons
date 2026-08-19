@@ -27,12 +27,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # SPT 4.1 targets .NET 10 (server-csharp Build.props), so 9.0.x is no longer enough.
-      # Action + version string match sp-tarkov/server-csharp's own .github/workflows/test.yaml,
-      # which builds and tests net10.0 on ubuntu-latest today.
+      # SPT 4.0.x targets .NET 9.
       - uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0
+          dotnet-version: 9.0
 
       # Fail early if the pushed tag doesn't match <Version> in the csproj, so we never
       # publish a zip whose filename disagrees with the tag.
@@ -40,7 +38,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
         run: |
-          CSPROJ_VERSION=$(grep -oE '<Version>[^<]+</Version>' SouthernHemisphereSeasons.csproj | head -1 | sed -E 's|</?Version>||g')
+          CSPROJ_VERSION=$(grep -oE '<Version>[^<]+</Version>' NorthernHemisphereSeasons.csproj | head -1 | sed -E 's|</?Version>||g')
           TAG_VERSION="${GITHUB_REF_NAME#v}"
           echo "csproj=<$CSPROJ_VERSION>  tag=<$TAG_VERSION>"
           if [ "$CSPROJ_VERSION" != "$TAG_VERSION" ]; then
@@ -50,16 +48,16 @@ jobs:
 
       # Runs on every push/PR. A failure here blocks the release steps below.
       - name: Test
-        run: dotnet test Tests/SouthernHemisphereSeasons.Tests.csproj --verbosity normal
+        run: dotnet test Tests/NorthernHemisphereSeasons.Tests.csproj --verbosity normal
 
-      # Release build runs the CreateReleaseZip target -> bin/Release/SouthernHemisphereSeasons-v<version>.zip
+      # Release build runs the CreateReleaseZip target -> bin/Release/NorthernHemisphereSeasons-v<version>.zip
       - name: Build Release
-        run: dotnet build SouthernHemisphereSeasons.csproj -c Release
+        run: dotnet build NorthernHemisphereSeasons.csproj -c Release
 
       - name: Upload zip artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SouthernHemisphereSeasons-zip
+          name: NorthernHemisphereSeasons-zip
           path: bin/Release/*.zip
 
       - name: Publish GitHub Release

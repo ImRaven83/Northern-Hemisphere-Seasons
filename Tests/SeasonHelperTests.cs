@@ -1,8 +1,8 @@
 using NUnit.Framework;
-using SouthernHemisphereSeasons;
+using NorthernHemisphereSeasons;
 using SPTarkov.Server.Core.Models.Enums;
 
-namespace SouthernHemisphereSeasons.Tests;
+namespace NorthernHemisphereSeasons.Tests;
 
 /// <summary>
 /// Covers SeasonHelper only - the pure calendar logic that is the whole point of this mod.
